@@ -86,6 +86,20 @@ body.dark .bg-video.night{display:block}
 }
 @keyframes fadeIn{to{opacity:1;transform:translateY(0)}}
 
+/* ─────────── USERNAME DISPLAY ─────────── */
+.user-display {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffeb3b;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 14px;
+  border-radius: 8px;
+  z-index: 10;
+}
+
 /* ─────────── BACK ARROW ─────────── */
 .back-arrow{
   position:absolute;top:16px;left:16px;z-index:2;
@@ -340,6 +354,21 @@ body:not(.dark) #login-error {
   margin-left: 2px;
 }
 
+#user-display {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #ffffff;
+  background: linear-gradient(135deg, #2196f3, #03a9f4);
+  padding: 6px 14px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  display: none;
+}
+
 /* ───────── FIXES BY OVERRIDES ──────── */
 .signup-form a[href*="Terms"]{
   color:#03a9f4 !important;
@@ -418,4 +447,63 @@ body:not(.dark) .login-form a {
 
 body:not(.dark) .choice-btn {
   color: #fff !important;
+}
+
+.login-form .login-extra {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+}
+
+#forgot-link {
+  white-space: nowrap;
+}
+
+body.dark .signup-form .terms-check a{
+  color:#03a9f4 !important;   /* light-blue link */
+}
+
+.login-form .login-extra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: -10px; /* optional: reduces vertical space */
+  font-size: 0.95rem;
+}
+
+.login-form .login-extra{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;   
+  gap:12px;                     
+  flex-wrap:nowrap;             
+  margin-top:-6px;              
+}
+
+.login-form .login-extra label.remember-label{
+  display:flex;
+  align-items:center;
+  gap:6px;          
+  margin:0;
+  flex:0 0 auto;    
+}
+
+.login-form .login-extra #forgot-link{
+  flex:0 0 auto;
+  white-space:nowrap;
+  text-decoration:underline;
+}
+
+#forgot-link {
+  color: #ffca28;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+body.dark #forgot-link {
+  color: #03a9f4 !important;
 }
