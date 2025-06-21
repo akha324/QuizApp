@@ -34,6 +34,12 @@
 
     /* make “Remember Me” white in light mode */
     body:not(.dark) .login-form label{color:#fff;}
+
+    /* one-liner for Remember-Me + Forgot-Password */
+    .login-extra{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:8px;margin:-10px 0 12px;
+    }
   </style>
 </head>
 
@@ -136,6 +142,7 @@
       timerChk.onchange=e=>{settings.timerOn=e.target.checked;qTime.disabled=!settings.timerOn}
       qTime.oninput=e=>settings.timePerQuestion=Math.max(5,+e.target.value);
     }
+    window.showSettings = showSettings;
 
     /* ---------- SIGN-UP ---------- */
     const users=[
@@ -171,6 +178,7 @@
       card.querySelector("#signup-form").onsubmit=handleSignUp;
       card.querySelector("#terms-link").onclick=e=>{e.preventDefault();showTermsPage();};
     }
+    window.showSignUpForm = showSignUpForm;
 
     function handleSignUp(e){
       e.preventDefault();
@@ -196,12 +204,12 @@
         <form id="login-form" class="login-form">
           <input class="cut-corner-input" name="identifier" type="text"     placeholder="Username or Email" required />
           <input class="cut-corner-input" name="password"   type="password" placeholder="Password"        required />
-          <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;margin-top:-10px">
-            <input type="checkbox" id="remember-me" /> Remember Me
-          </label>
-          <p style="margin:-6px 0 12px;text-align:right">
+          <div class="login-extra">
+            <label class="remember-label" style="display:flex;align-items:center;gap:8px;font-size:.9rem;">
+              <input type="checkbox" id="remember-me"/> Remember Me
+            </label>
             <a href="#" id="forgot-link" style="color:#ffca28;text-decoration:underline;font-size:.9rem">Forgot Password?</a>
-          </p>
+          </div>
           <button class="start" type="submit">Log In</button>
         </form>
         <p id="login-message" style="display:none;margin-top:18px;color:#4caf50">✅ Welcome back!</p>
@@ -212,6 +220,8 @@
       card.querySelector("#login-form").onsubmit=handleLogIn;
       card.querySelector("#forgot-link").onclick=e=>{e.preventDefault();showResetForm();};
     }
+    window.showLogInForm = showLogInForm;
+
     function handleLogIn(e){
       e.preventDefault();
       const f=e.target,id=f.identifier.value.trim().toLowerCase(),pw=f.password.value;
@@ -242,22 +252,22 @@
 
     /* ---------- TERMS PAGE ---------- */
     function showTermsPage(){
-      card.innerHTML=`
-        <button class="back-arrow" onclick="showSignUpForm()">
-          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <h1 class="title">Terms &amp; Services</h1>
-        <div class="terms-container">
-          <p>By using QuizApp, you agree to the following:</p>
-          <ul>
-            <li>You are at least 13 years old or have guardian consent.</li>
-            <li>All content must be appropriate and respectful.</li>
-            <li>Your data is used only for account-related functionality.</li>
-            <li>No personal data is shared or sold to third parties.</li>
-            <li>QuizApp is provided as-is without warranty.</li>
-          </ul>
-          <p>Last updated: June 21, 2025</p>
-        </div>`;
+      card.innerHTML = `
+    <button class="back-arrow" onclick="showSignUpForm()">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1 class="title">Terms &amp; Services</h1>
+    <div class="terms-container">
+      <p>By using QuizApp, you agree to the following:</p>
+      <ul>
+        <li><strong>Age Requirement:</strong> You are at least 13 years old or have guardian consent.</li>
+        <li><strong>Respectful Conduct:</strong> All content must be appropriate and respectful.</li>
+        <li><strong>Data Usage:</strong> Your data is used only for account-related functionality.</li>
+        <li><strong>Privacy Commitment:</strong> No personal data is shared or sold to third parties.</li>
+        <li><strong>Disclaimer:</strong> QuizApp is provided as-is without warranty.</li>
+      </ul>
+      <p>Last updated: June 21, 2025</p>
+    </div>`;
     }
 
     /* ---------- QUIZ FLOW ---------- */
@@ -341,9 +351,11 @@
 
     /* ---------- INIT ---------- */
     showWelcome();
-    window.showSettings=showSettings;
-    window.showLogInForm=showLogInForm;
-    window.showSignUpForm=showSignUpForm;
+    window.showSettings  = showSettings;
+    window.showLogInForm = showLogInForm;
+    window.showSignUpForm= showSignUpForm;
+    window.showWelcome   = showWelcome;   /* ← added export */
+    window.startQuiz     = startQuiz;     /* ← added export */
   </script>
 </body>
 </html>
