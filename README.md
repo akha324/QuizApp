@@ -1,4 +1,5 @@
 // CSCI 355 Project 2 by Ashiq Khan and Sabir Ahamed. 🎯
+
 /* QuizApp is a lightweight, browser-based quiz game designed to offer a fun and interactive way to test general knowledge. Built entirely with HTML, CSS, and JavaScript, this application runs entirely on the client-side and does not rely on a traditional client-server architecture or backend database. Instead, it fetches quiz questions from a remote JSON file hosted online, making it simple and fast to deploy without server dependencies.                                                                 */
 
 🧠 Quiz Content & Categories
