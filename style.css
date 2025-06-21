@@ -249,3 +249,6 @@ body.dark #forgot-link{color:#03a9f4 !important}                       /* alread
 body:not(.dark) .choice-btn{color:#fff !important}
 body:not(.dark) .signup-form .terms-check{color:#fff !important}
 
+body.dark .login-form label.remember-label {
+  color: #fff !important;
+}
