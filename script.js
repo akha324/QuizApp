@@ -19,9 +19,47 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("theme", t);
   };
   applyTheme(getSavedOrPreferred());
-  btnTg?.addEventListener("click", () => {
-    applyTheme(body.classList.contains(THEMES.DARK) ? THEMES.LIGHT : THEMES.DARK);
-  });
+  btnTg?.addEventListener("click", () =>
+    applyTheme(body.classList.contains(THEMES.DARK) ? THEMES.LIGHT : THEMES.DARK));
+
+  /* ────────── “MAILTO” HELPERS ────────── */
+  const sendMail = (to, subject, bodyTxt) => {
+    const uri =
+      `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(bodyTxt)}`;
+    window.open(uri, "_blank");
+  };
+
+  const sendVerificationEmail = (toEmail, user) => {
+    const subject = "QuizApp – Verify your email";
+    const body    = `Hello ${user},
+
+Thank you for creating a QuizApp account!
+
+Please verify your email by sending this message.
+
+If you did not initiate this request, you can safely ignore it.
+
+— QuizApp Team`;
+    sendMail(toEmail, subject, body);
+  };
+
+  const sendResetEmail = (toEmail, user) => {
+    const link    = `https://akha324.github.io/QuizApp/reset?e=${encodeURIComponent(toEmail)}&t=${Date.now()}`;
+    const subject = "QuizApp – Password reset";
+    const body    = `Hi ${user || "there"},
+
+We received a request to reset your QuizApp password.
+Click the link below to create a new one:
+
+${link}
+
+If you didn’t request this, just ignore this email.`;
+    sendMail(toEmail, subject, body);
+  };
+
+  /* ────────── (OPTIONAL) GLOBAL SETTINGS FALLBACK ────────── */
+  if (!window.settings) window.settings = { timerOn:false, timePerQuestion:15 };
 
   /* ────────── QUIZ DATA & STATE ────────── */
   const QUESTIONS_URL =
@@ -30,12 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const shuffle = a => a.sort(() => Math.random() - 0.5);
 
   /* ────────── TIMER (per-question) ────────── */
-  let timerId = null, timeLeft = 0;
+  let timerId = null;
   const clearTimer = () => { clearInterval(timerId); timerId = null; document.getElementById("quiz-timer")?.remove(); };
 
-  const startTimer = seconds => {
+  const startTimer = (seconds, onTimeout) => {
     clearTimer();
-    timeLeft = seconds;
+    let timeLeft = seconds;
     const el = document.createElement("div");
     el.id = "quiz-timer";
     el.style.cssText = `
@@ -43,16 +81,23 @@ document.addEventListener("DOMContentLoaded", () => {
       background:rgba(0,0,0,.65);padding:6px 16px;border-radius:8px;
       font-weight:600;z-index:99;color:#fff;font-size:1rem`;
     body.appendChild(el);
+
     const tick = () => {
       el.textContent = `⏱️ ${timeLeft}s`;
       if (timeLeft-- <= 0) {
         clearTimer();
-        autoTimeout();
+        onTimeout?.();
       }
     };
     tick();
     timerId = setInterval(tick, 1000);
   };
+
+  /* ────────── UTIL: back-button markup ────────── */
+  const backBtn = () => `
+    <button class="back-arrow" id="back-arrow">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>`;
 
   /* ────────── TERMS PAGE ────────── */
   function showTermsPage() {
@@ -80,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     card.querySelector("#back-arrow").onclick = showSignUpForm;
   }
 
-  /* ────────── SCREEN BUILDERS ────────── */
+  /* ────────── WELCOME / ERROR / RESULT BUILDERS ────────── */
   const buildWelcome = () => {
     clearTimer();
     card.innerHTML = `
@@ -99,10 +144,24 @@ document.addEventListener("DOMContentLoaded", () => {
     card.querySelector("#back-btn").onclick = buildWelcome;
   };
 
+  const buildResult = () => {
+    clearTimer();
+    card.innerHTML = `
+      <h2>Quiz Complete</h2>
+      <p class="score">${score} / ${questions.length}</p>
+      <div class="btn-group">
+        <button class="retry" id="retry-btn">Try Again</button>
+        <button class="btn-home" id="home-btn">Return to Home</button>
+      </div>`;
+    card.querySelector("#retry-btn").onclick = startQuiz;
+    card.querySelector("#home-btn").onclick  = buildWelcome;
+  };
+
+  /* ────────── QUESTION BUILDER ────────── */
   const extractOptions = q => {
-    if (Array.isArray(q.choices)) return q.choices;
-    if (Array.isArray(q.answers)) return q.answers;
-    return Object.keys(q).filter(k => /^[A-D]$/i.test(k)).sort()
+    if (Array.isArray(q.choices))  return q.choices;
+    if (Array.isArray(q.answers))  return q.answers;
+    return Object.keys(q).filter(k=>/^[A-D]$/i.test(k)).sort()
              .map(k => ({ key:k, text:q[k] }));
   };
   const correctIndex = (q,o) => {
@@ -116,7 +175,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const buildQuestion = () => {
     clearTimer();
     const q = questions[idx];
-    let opts = extractOptions(q); const corr = correctIndex(q,opts);
+    let opts = extractOptions(q);
+    const corr = correctIndex(q, opts);
     if (!opts.length) return buildError("This question has no options.");
     if (typeof opts[0] !== "string") opts = opts.map(o => `${o.key}: ${o.text}`);
 
@@ -126,52 +186,34 @@ document.addEventListener("DOMContentLoaded", () => {
       <div id="choices">
         ${opts.map((t,i)=>`<button class="choice-btn" data-i="${i}">${t}</button>`).join("")}
       </div>`;
-    const btns = [...card.querySelectorAll(".choice-btn")];
-    const lockButtons = () => btns.forEach(x => (x.disabled = true));
 
-    btns.forEach(b => {
+    const btns  = [...card.querySelectorAll(".choice-btn")];
+    const lock  = () => btns.forEach(b=>b.disabled=true);
+    const after = () => setTimeout(() => ++idx < questions.length ? buildQuestion() : buildResult(), 1500);
+
+    btns.forEach(b=>{
       b.onclick = e => {
         clearTimer();
         const sel = +e.target.dataset.i;
-        lockButtons();
-        if (sel === corr) { e.target.classList.add("correct"); score++; }
+        lock();
+        if (sel===corr){ e.target.classList.add("correct"); score++; }
         else { e.target.classList.add("wrong"); corr>=0 && btns[corr].classList.add("correct"); }
-        setTimeout(() => ++idx < questions.length ? buildQuestion() : buildResult(), 1500);
+        after();
       };
     });
 
-    /* start question timer if enabled in global settings */
-    const settings = window.settings;
-    if (settings?.timerOn) startTimer(Math.max(3, +settings.timePerQuestion || 15));
-
-    /* if time runs out, pick "no answer" and continue */
-    function autoTimeout(){
-      lockButtons();
-      if (corr>=0) btns[corr].classList.add("correct");
-      setTimeout(()=>++idx<questions.length?buildQuestion():buildResult(),1500);
+    /* timer (if enabled) */
+    if (window.settings.timerOn){
+      startTimer(Math.max(3, +window.settings.timePerQuestion || 15), () => {
+        lock();
+        corr>=0 && btns[corr].classList.add("correct");
+        after();
+      });
     }
   };
 
-  const buildResult = () => {
-    clearTimer();
-    card.innerHTML = `
-      <h2>Quic Complete</h2>
-      <p class="score">${score} / ${questions.length}</p>
-      <div class="btn-group">
-        <button class="retry" id="retry-btn">Try Again</button>
-        <button class="btn-home" id="home-btn">Return to Home</button>
-      </div>`;
-    card.querySelector("#retry-btn").onclick = startQuiz;
-    card.querySelector("#home-btn").onclick  = buildWelcome;
-  };
-
-  /* ────────── SIGN-UP / LOG-IN (mock) ────────── */
-  const users = [];
-  const backBtn = () => `
-    <button class="back-arrow" id="back-arrow">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>`;
-
+  /* ────────── SIGN-UP / LOG-IN / RESET (mock) ────────── */
+  const users   = [];
   function showSignUpForm(){
     card.innerHTML = `
       ${backBtn()}
@@ -189,31 +231,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <button class="start" type="submit">Create Account</button>
       </form>
-      <p id="signup-ok"  style="display:none;color:#4caf50">✅ Account created!</p>
+      <p id="signup-ok"  style="display:none;color:#4caf50">✅ A verification email has been sent. Please send it to complete your registration.</p>
       <p id="signup-err" style="display:none;color:#f44336">❌ Passwords do not match or terms not agreed.</p>`;
     card.querySelector("#back-arrow").onclick = buildWelcome;
     card.querySelector("#signup-form").onsubmit = handleSignUp;
-    /* NEW — make link open Terms page */
-    card.querySelector("#terms-link").onclick = e => { e.preventDefault(); showTermsPage(); };
+    card.querySelector("#terms-link").onclick   = e => { e.preventDefault(); showTermsPage(); };
   }
-
   function handleSignUp(e){
     e.preventDefault();
-    const f = e.target;
-    const agreed = f.querySelector("#agree-terms")?.checked;
-    if (f.password.value !== f.confirm.value || !agreed) {
-      card.querySelector("#signup-err").style.display = "block";
-      card.querySelector("#signup-ok").style.display = "none";
+    const f = e.target, agreed = f.querySelector("#agree-terms").checked;
+    if (f.password.value!==f.confirm.value || !agreed){
+      card.querySelector("#signup-err").style.display="block";
+      card.querySelector("#signup-ok").style.display="none";
       return;
     }
-    users.push({
-      username: f.username.value.trim().toLowerCase(),
-      email:    f.email.value.trim().toLowerCase(),
-      password: f.password.value
-    });
+    const username=f.username.value.trim();
+    const email   =f.email.value.trim().toLowerCase();
+    users.push({ username, email, password:f.password.value });
+
+    /* open mail client */
+    sendVerificationEmail(email, username);
+
     f.reset();
-    card.querySelector("#signup-ok").style.display = "block";
-    card.querySelector("#signup-err").style.display = "none";
+    card.querySelector("#signup-ok").style.display="block";
+    card.querySelector("#signup-err").style.display="none";
   }
 
   function showResetForm(){
@@ -225,12 +266,16 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="start" type="submit">Send Reset Link</button>
       </form>
       <p id="reset-msg" style="display:none;color:#4caf50;margin-top:18px">
-        📧 If the email exists in our system, a reset link has been sent.
+        📧 Password reset email opened. Please send it to continue.
       </p>`;
     card.querySelector("#back-arrow").onclick = buildWelcome;
     card.querySelector("#reset-form").onsubmit = e=>{
-      e.preventDefault(); e.target.reset();
-      card.querySelector("#reset-msg").style.display = "block";
+      e.preventDefault();
+      const em = e.target.email.value.trim().toLowerCase();
+      const u  = users.find(z=>z.email===em);
+      sendResetEmail(em, u?.username);
+      e.target.reset();
+      card.querySelector("#reset-msg").style.display="block";
     };
   }
 
@@ -254,35 +299,54 @@ document.addEventListener("DOMContentLoaded", () => {
       <p id="login-ok"  style="display:none;color:#4caf50">✅ Welcome back!</p>
       <p id="login-err" style="display:none;color:#f44336">❌ Login failed.</p>`;
     const saved = localStorage.getItem("rememberedUser");
-    if (saved) card.querySelector("input[name='identifier']").value = saved;
+    if(saved) card.querySelector("input[name='identifier']").value = saved;
 
     card.querySelector("#back-arrow").onclick = buildWelcome;
     card.querySelector("#login-form").onsubmit = handleLogIn;
     card.querySelector("#forgot-link").onclick = e => { e.preventDefault(); showResetForm(); };
   }
+  function handleLogIn(e) {
+  e.preventDefault();
+  const f = e.target;
+  const id = f.identifier.value.trim().toLowerCase();
+  const pw = f.password.value;
 
-  function handleLogIn(e){
-    e.preventDefault();
-    const f=e.target,id=f.identifier.value.trim().toLowerCase(),pw=f.password.value;
-    const ok=users.find(u=>(u.username===id||u.email===id)&&u.password===pw);
-    card.querySelector("#login-ok").style.display = ok ? "block" : "none";
-    card.querySelector("#login-err").style.display = ok ? "none"  : "block";
-    if (ok) setTimeout(buildWelcome,1200);
+  const ok = users.find(u => (u.username === id || u.email === id) && u.password === pw);
+
+  const okMsg  = card.querySelector("#login-ok");
+  const errMsg = card.querySelector("#login-err");
+
+  if (ok) {
+    okMsg.style.display  = "block";
+    errMsg.style.display = "none";
+
+    // ✅ Show username at top-left
+    const userDisplay = document.getElementById("user-display");
+    if (userDisplay) {
+      userDisplay.textContent = `👤 ${ok.username}`;
+      userDisplay.style.display = "block";
+    }
+
+    setTimeout(buildWelcome, 1200);
+  } else {
+    okMsg.style.display  = "none";
+    errMsg.style.display = "block";
   }
+}
+
 
   /* ────────── DATA FETCH & FLOW ────────── */
   const sampleFallback = [
     { question:"What is the capital of France?", choices:["Berlin","Madrid","Paris","Rome"], answer:2 },
-    { question:"2 + 2 = ?", choices:["3","4","5","6"], answer:1 }
+    { question:"2 + 2 = ?",                      choices:["3","4","5","6"],                answer:1 }
   ];
-
   const fetchQuestions = async () => {
     try{
-      const r = await fetch(QUESTIONS_URL,{cache:"no-store"});
+      const r=await fetch(QUESTIONS_URL,{cache:"no-store"});
       if(!r.ok) throw new Error(`HTTP ${r.status}`);
-      const data = await r.json();
-      if(!Array.isArray(data)||!data.length) throw new Error("Empty data");
-      return shuffle(data).slice(0,10);
+      const d=await r.json();
+      if(!Array.isArray(d)||!d.length) throw new Error("Empty data");
+      return shuffle(d).slice(0,10);
     }catch(err){
       console.warn("⚠️ Using fallback questions:",err.message);
       return shuffle(sampleFallback);
@@ -291,15 +355,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function startQuiz(){
     idx = score = 0;
-    try{
-      questions = await fetchQuestions();
-      buildQuestion();
-    }catch(err){
-      buildError(err.message||"Unable to load quiz.");
-    }
+    try{ questions = await fetchQuestions(); buildQuestion(); }
+    catch(err){ buildError(err.message||"Unable to load quiz."); }
   }
 
   /* ────────── INIT ────────── */
   buildWelcome();
-  Object.assign(window,{buildWelcome,showSignUpForm,showLogInForm});
+  Object.assign(window,{
+    buildWelcome, showSignUpForm, showLogInForm,
+    showResetForm, showTermsPage, startQuiz
+  });
 });
+
+document.head.insertAdjacentHTML("beforeend", `
+  <style>
+    body.dark .signup-form .terms-line a {
+      color: #64b5f6 !important;  /* Light Blue */
+      text-decoration: underline;
+    }
+  </style>
+`);
+
+// ────────── LOGOUT HANDLER ──────────
+function setupLogoutMenu() {
+  const userDisplay = document.getElementById("user-display");
+  if (!userDisplay) return;
+
+  const logoutBtn = document.createElement("button");
+  logoutBtn.textContent = "Log Out";
+  logoutBtn.style.cssText = `
+    position: absolute;
+    top: 42px;
+    left: 0;
+    background: #222;
+    color: #fff;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 100;
+    display: none;
+  `;
+  logoutBtn.id = "logout-btn";
+  userDisplay.style.cursor = "pointer";
+  userDisplay.appendChild(logoutBtn);
+
+  userDisplay.onclick = () => {
+    logoutBtn.style.display = logoutBtn.style.display === "none" ? "block" : "none";
+  };
+
+  logoutBtn.onclick = () => {
+    userDisplay.style.display = "none";
+    logoutBtn.style.display = "none";
+    userDisplay.textContent = "";
+    buildWelcome();
+  };
+}
