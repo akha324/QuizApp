@@ -54,6 +54,10 @@
 
   <!-- overlay & top bar -->
   <div class="overlay" aria-hidden="true"></div>
+
+  <!-- username display (initially hidden) -->
+  <div id="user-display" class="user-display" style="display:none;"></div>
+
   <div class="top-buttons">
     <button class="sign-up-btn" onclick="showSettings()">Settings</button>
     <button class="sign-up-btn" onclick="showLogInForm()">Log In</button>
@@ -228,7 +232,14 @@
       const ok=users.find(u=>(u.username===id||u.email===id)&&u.password===pw);
       card.querySelector("#login-message").style.display=ok?"block":"none";
       card.querySelector("#login-error"  ).style.display=!ok?"block":"none";
-      if(ok) setTimeout(showWelcome,1200);
+      if(ok){
+        /* show username at top-left */
+        const uDisp=document.getElementById("user-display");
+        uDisp.textContent=`👤 ${ok.username}`;     // 👤 + username
+        uDisp.style.display="block";
+
+        setTimeout(showWelcome,1200);
+      }
     }
 
     /* ---------- RESET PASSWORD ---------- */
