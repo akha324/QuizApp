@@ -28,8 +28,8 @@ QuizApp was designed to be more accessible. It can be accessed simply by clickin
 
 🤝 Contributions
 
-I, Ashiq Khan, made many contributions to this project. To begin, I made the homepage, the pages of questions that appear when you "Start Quiz", and the results page. I also wrote the CSS code to make the webpage look aesthetically pleasing and the JavaScript code to control the function of each button. In addition, I added the various buttons on top including the toggle button between light and dark mode, the "Sign Up" button, "Log In" button, and "Settings" button. I made the forms that they bring the user to. My partner improvised the code. He modified the HTML, CSS, and JavaScript to code to meet the demands of the project. If he makes his own project and submits it, please count mines and his separately. Thank you for your cooperation.
+I (Ashiq Khan) and my partner made many contributions to this project. To begin, I made the homepage, the pages of questions that appear when you "Start Quiz", and the results page. I also wrote the CSS code to make the webpage look aesthetically pleasing and the JavaScript code to control the function of each button. In addition, I added the various buttons on top including the toggle button between light and dark mode, the "Sign Up" button, "Log In" button, and "Settings" button. I made the forms that they bring the user to. My partner improvised the code. He modified the HTML, CSS, and JavaScript to code to meet the demands of the project. If he makes his own project and submits it, please count mines and his separately. Thank you for your cooperation.
 
 📄 License
 
-The project is open-source and is free for anyone to use. Feedback on how to improve the project is strongly appreciated. 
+The project is open-source and is free for anyone to use. Feedback on how to improve the project is greatly appreciated. 
