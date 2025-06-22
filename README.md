@@ -32,4 +32,4 @@ I (Ashiq Khan) and my partner made many contributions to this project. To begin,
 
 📄 License
 
-The project is open-source and is free for anyone to use. Feedback on how to improve the project is greatly appreciated. 
+The project is open-source and is free for anyone to use. Feedback on how to improve the project is greatly appreciated.  
