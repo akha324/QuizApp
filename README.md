@@ -1,4 +1,4 @@
-// CSCI 355 Project 2 by Ashiq Khan (and Sabir Ahamed). 🎯
+// CSCI 355 Project 2 by Ashiq Khan 🎯
 
 /* QuizApp is a fun and interactive browser game designed to test your knowledge. This software follows the client-server architecture and is written in HTML, CSS, and JavaScript. Instead of fetching a physical file of questions, it fetches them from Dropbox.                           */
 
@@ -28,7 +28,7 @@ QuizApp was designed to be more accessible. It can be accessed simply by clickin
 
 🤝 Contributions
 
-I (Ashiq Khan) and my partner made many contributions to this project. To begin, I made the homepage, the pages of questions that appear when you "Start Quiz", and the results page. I also wrote the CSS code to make the webpage look aesthetically pleasing and the JavaScript code to control the function of each button. In addition, I added the various buttons on top including the toggle button between light and dark mode, the "Sign Up" button, "Log In" button, and "Settings" button. I made the forms that they bring the user to. My partner improvised the code. He modified the HTML, CSS, and JavaScript to code to meet the demands of the project. If he makes his own project and submits it, please count mines and his separately. Thank you for your cooperation.
+I (Ashiq Khan) made many contributions to this project. To begin, I made the homepage, the pages of questions that appear when you "Start Quiz", and the results page. I also wrote the CSS code to make the webpage look aesthetically pleasing and the JavaScript code to control the function of each button. In addition, I added the various buttons on top including the toggle button between light and dark mode, the "Sign Up" button, "Log In" button, and "Settings" button. I made the forms that they bring the user to. I improvised the code by uilizing the client-server architecture. I modified the HTML, CSS, and JavaScript to code to meet the demands of the project. Thank you for your cooperation.
 
 📄 License
 
