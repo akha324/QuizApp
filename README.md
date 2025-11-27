@@ -12,7 +12,7 @@ The user must click on or tap the "Start Quiz" button to play the game. Next, th
 
 ✅ Scoring System
 
-The score of the user is stored in JavaScript. Each time the user selects the correct answer, the sore increase by one. Once the user is finished with the quiz, the quiz shows a "Quiz Complete!" message along with a score. In addition, the user is shown as "Try Again" or "Go Home" button. As the name suggests, the "Try Again" button replays the quiz whereas the "Go Home" button returns to the home page. This ensures that there is fairness to users.
+The score of the user is stored in JavaScript. Each time the user selects the correct answer, the score increase by one. Once the user is finished with the quiz, the quiz shows a "Quiz Complete!" message along with a score. In addition, the user is shown as "Try Again" or "Go Home" button. As the name suggests, the "Try Again" button replays the quiz whereas the "Go Home" button returns to the home page. This ensures that there is fairness to users.
 
 ✨ Features & Customization
 
